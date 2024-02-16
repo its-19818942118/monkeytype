@@ -7,11 +7,11 @@ const wrapperId = "wordFilterPopupWrapper";
 
 let initialised = false;
 
-interface FilterPreset {
+type FilterPreset = {
   display: string;
   getIncludeString: (layout: MonkeyTypes.Layout) => string[];
   getExcludeString: (layout: MonkeyTypes.Layout) => string[];
-}
+};
 
 const presets: Record<string, FilterPreset> = {
   homeKeys: {
@@ -248,8 +248,7 @@ async function filter(language: string): Promise<string[]> {
   } else {
     minLength = parseInt(minLengthInput);
   }
-  for (let i = 0; i < languageWordList.words.length; i++) {
-    const word = languageWordList.words[i];
+  for (const word of languageWordList.words) {
     const test1 = regincl.test(word);
     const test2 = regexcl.test(word);
     if (
@@ -294,13 +293,13 @@ $("#wordFilterPopup .languageInput").one("select2:open", function () {
 $("#wordFilterPopupWrapper .button.addButton").on("mousedown", () => {
   $("#wordFilterPopupWrapper .loadingIndicator").removeClass("hidden");
   $("#wordFilterPopupWrapper .button").addClass("hidden");
-  apply(false);
+  void apply(false);
 });
 
 $("#wordFilterPopupWrapper .button.setButton").on("mousedown", () => {
   $("#wordFilterPopupWrapper .loadingIndicator").removeClass("hidden");
   $("#wordFilterPopupWrapper .button").addClass("hidden");
-  apply(true);
+  void apply(true);
 });
 
 $("#wordFilterPopup .button.generateButton").on("click", async () => {
@@ -308,6 +307,12 @@ $("#wordFilterPopup .button.generateButton").on("click", async () => {
   const layoutName = $("#wordFilterPopup .layoutInput").val() as string;
 
   const presetToApply = presets[presetName];
+
+  if (presetToApply === undefined) {
+    Notifications.add(`Preset ${presetName} not found`, -1);
+    return;
+  }
+
   const layout = await Misc.getLayout(layoutName);
 
   $("#wordIncludeInput").val(
